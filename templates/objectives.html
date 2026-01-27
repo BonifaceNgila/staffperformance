@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objectives - Staff Performance System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Staff Performance System</h1>
+            </div>
+            <div class="nav-user">
+                <span>Welcome, {{.User.FullName}}</span>
+                <a href="/dashboard" class="btn-link">Dashboard</a>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="main-menu">
+            <div class="menu-item">
+                <a href="/dashboard">
+                    <div class="menu-icon">🏠</div>
+                    <h3>Home</h3>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/tasks">
+                    <div class="menu-icon">✓</div>
+                    <h3>Tasks</h3>
+                    <p>Manage your tasks</p>
+                </a>
+            </div>
+            <div class="menu-item active">
+                <a href="/objectives">
+                    <div class="menu-icon">🎯</div>
+                    <h3>Objectives</h3>
+                    <p>Track performance goals</p>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/reports">
+                    <div class="menu-icon">📊</div>
+                    <h3>Reports</h3>
+                    <p>View analytics</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-header">
+                <h2>My Objectives</h2>
+                <a href="/objectives/new" class="btn btn-primary">+ New Objective</a>
+            </div>
+
+            {{if .Objectives}}
+                {{range .Objectives}}
+                <div class="objective-card">
+                    <div class="objective-header">
+                        <div>
+                            <h3>{{.Objective.Title}}</h3>
+                            <p class="objective-description">{{.Objective.Description}}</p>
+                            <p class="objective-dates">
+                                <strong>Period:</strong> {{.Objective.StartDate.Format "Jan 02, 2006"}} - {{.Objective.EndDate.Format "Jan 02, 2006"}}
+                            </p>
+                        </div>
+                        <div class="objective-actions">
+                            <div class="performance-badge">
+                                <span class="performance-label">Performance</span>
+                                <span class="performance-value">{{printf "%.1f" .Objective.Performance}}%</span>
+                            </div>
+                            <a href="/objectives/edit?id={{.Objective.ID}}" class="btn btn-secondary btn-sm">Edit</a>
+                            <a href="/objectives/delete?id={{.Objective.ID}}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this objective? All associated outcomes and activities will be deleted.')">Delete</a>
+                        </div>
+                    </div>
+
+                    <div class="outcomes-section">
+                        <div class="section-header">
+                            <h4>Expected Outcomes</h4>
+                            <a href="/outcomes/new?objective_id={{.Objective.ID}}" class="btn btn-secondary btn-sm">+ Add Outcome</a>
+                        </div>
+
+                        {{if .ExpectedOutcomes}}
+                            {{range .ExpectedOutcomes}}
+                            <div class="outcome-card">
+                                <div class="outcome-header">
+                                    <div>
+                                        <h5>{{.ExpectedOutcome.Title}}</h5>
+                                        <p class="outcome-description">{{.ExpectedOutcome.Description}}</p>
+                                    </div>
+                                    <div class="outcome-actions">
+                                        <a href="/outcomes/edit?id={{.ExpectedOutcome.ID}}" class="btn btn-link">Edit</a>
+                                        <a href="/outcomes/delete?id={{.ExpectedOutcome.ID}}" class="btn btn-link" onclick="return confirm('Are you sure? All activities will be deleted.')">Delete</a>
+                                    </div>
+                                </div>
+
+                                <div class="activities-section">
+                                    <div class="section-header">
+                                        <h6>Activities/Tasks</h6>
+                                        <a href="/activities/new?outcome_id={{.ExpectedOutcome.ID}}" class="btn btn-link">+ Add Activity</a>
+                                    </div>
+
+                                    {{if .Activities}}
+                                    <div class="activities-table">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Title</th>
+                                                    <th>Category</th>
+                                                    <th>Progress</th>
+                                                    <th>Implementation Level</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {{range .Activities}}
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{.Title}}</strong>
+                                                        {{if .Description}}<br><small>{{.Description}}</small>{{end}}
+                                                    </td>
+                                                    <td><span class="category-badge category-{{.Category}}">{{.Category}}</span></td>
+                                                    <td>
+                                                        <div class="progress-bar">
+                                                            <div class="progress-fill" style="width: {{.ProgressPercentage}}%"></div>
+                                                            <span class="progress-text">{{printf "%.0f" .ProgressPercentage}}%</span>
+                                                        </div>
+                                                    </td>
+                                                    <td><small>{{.ImplementationLevel}}</small></td>
+                                                    <td>
+                                                        <a href="/activities/edit?id={{.ID}}" class="btn btn-link">Edit</a>
+                                                        <a href="/activities/delete?id={{.ID}}" class="btn btn-link" onclick="return confirm('Delete this activity?')">Delete</a>
+                                                    </td>
+                                                </tr>
+                                                {{end}}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {{else}}
+                                    <p class="empty-message">No activities yet. Add your first activity to track progress.</p>
+                                    {{end}}
+                                </div>
+                            </div>
+                            {{end}}
+                        {{else}}
+                        <p class="empty-message">No expected outcomes yet. Add an expected outcome to get started.</p>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            {{else}}
+            <div class="empty-state">
+                <h3>No Objectives Yet</h3>
+                <p>Start by creating your first performance objective.</p>
+                <a href="/objectives/new" class="btn btn-primary">Create Your First Objective</a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>

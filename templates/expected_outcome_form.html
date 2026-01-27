@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{if .IsEdit}}Edit{{else}}New{{end}} Expected Outcome - Staff Performance System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="form-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Staff Performance System</h1>
+            </div>
+            <div class="nav-user">
+                <span>Welcome, {{.User.FullName}}</span>
+                <a href="/dashboard" class="btn-link">Back to Dashboard</a>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="form-content">
+            <div class="breadcrumb">
+                <span>Objective: {{.Objective.Title}}</span>
+            </div>
+
+            <h2>{{if .IsEdit}}Edit{{else}}Add New{{end}} Expected Outcome</h2>
+
+            <form method="POST" class="data-form">
+                <div class="form-group">
+                    <label for="title">Expected Outcome Title *</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        value="{{if .ExpectedOutcome}}{{.ExpectedOutcome.Title}}{{end}}"
+                        placeholder="Enter expected outcome title" 
+                        required 
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="4"
+                        placeholder="Describe what you expect to achieve"
+                    >{{if .ExpectedOutcome}}{{.ExpectedOutcome.Description}}{{end}}</textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">{{if .IsEdit}}Update{{else}}Add{{end}} Expected Outcome</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

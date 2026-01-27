@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Staff Performance System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Staff Performance System</h1>
+            </div>
+            <div class="nav-user">
+                <span>Welcome, {{.User.FullName}}</span>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="main-menu">
+            <div class="menu-item active">
+                <a href="/dashboard">
+                    <div class="menu-icon">🏠</div>
+                    <h3>Home</h3>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/tasks">
+                    <div class="menu-icon">✓</div>
+                    <h3>Tasks</h3>
+                    <p>Manage your tasks</p>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/objectives">
+                    <div class="menu-icon">🎯</div>
+                    <h3>Objectives</h3>
+                    <p>Track performance goals</p>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/reports">
+                    <div class="menu-icon">📊</div>
+                    <h3>Reports</h3>
+                    <p>View analytics</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <h2>Dashboard Overview</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <h3>{{.TotalObjectives}}</h3>
+                        <p>Total Objectives</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✓</div>
+                    <div class="stat-content">
+                        <h3>{{.TotalTasks}}</h3>
+                        <p>Total Tasks</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>{{.CompletedTasks}}</h3>
+                        <p>Completed Tasks</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <h3>{{.PendingTasks}}</h3>
+                        <p>Pending Tasks</p>
+                    </div>
+                </div>
+
+                <div class="stat-card performance-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <h3>{{printf "%.1f" .AveragePerformance}}%</h3>
+                        <p>Average Performance</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <a href="/tasks/new" class="action-btn">
+                        <span class="action-icon">+</span>
+                        <span>New Task</span>
+                    </a>
+                    <a href="/objectives/new" class="action-btn">
+                        <span class="action-icon">+</span>
+                        <span>New Objective</span>
+                    </a>
+                    <a href="/reports" class="action-btn">
+                        <span class="action-icon">📊</span>
+                        <span>View Reports</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

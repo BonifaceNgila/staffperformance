@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{if .IsEdit}}Edit{{else}}New{{end}} Objective - Staff Performance System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="form-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Staff Performance System</h1>
+            </div>
+            <div class="nav-user">
+                <span>Welcome, {{.User.FullName}}</span>
+                <a href="/dashboard" class="btn-link">Back to Dashboard</a>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="form-content">
+            <h2>{{if .IsEdit}}Edit{{else}}Create New{{end}} Objective</h2>
+
+            <form method="POST" class="data-form">
+                <div class="form-group">
+                    <label for="title">Objective Title *</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        value="{{if .Objective}}{{.Objective.Title}}{{end}}"
+                        placeholder="Enter objective title" 
+                        required 
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="4"
+                        placeholder="Describe the objective"
+                    >{{if .Objective}}{{.Objective.Description}}{{end}}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_date">Start Date *</label>
+                        <input 
+                            type="date" 
+                            id="start_date" 
+                            name="start_date" 
+                            value="{{if .Objective}}{{.Objective.StartDate.Format "2006-01-02"}}{{end}}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date">End Date *</label>
+                        <input 
+                            type="date" 
+                            id="end_date" 
+                            name="end_date" 
+                            value="{{if .Objective}}{{.Objective.EndDate.Format "2006-01-02"}}{{end}}"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">{{if .IsEdit}}Update{{else}}Create{{end}} Objective</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

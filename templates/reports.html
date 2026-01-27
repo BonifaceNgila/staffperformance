@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Staff Performance System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Staff Performance System</h1>
+            </div>
+            <div class="nav-user">
+                <span>Welcome, {{.User.FullName}}</span>
+                <a href="/dashboard" class="btn-link">Dashboard</a>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="main-menu">
+            <div class="menu-item">
+                <a href="/dashboard">
+                    <div class="menu-icon">🏠</div>
+                    <h3>Home</h3>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/tasks">
+                    <div class="menu-icon">✓</div>
+                    <h3>Tasks</h3>
+                    <p>Manage your tasks</p>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/objectives">
+                    <div class="menu-icon">🎯</div>
+                    <h3>Objectives</h3>
+                    <p>Track performance goals</p>
+                </a>
+            </div>
+            <div class="menu-item active">
+                <a href="/reports">
+                    <div class="menu-icon">📊</div>
+                    <h3>Reports</h3>
+                    <p>View analytics</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <h2>Performance Reports</h2>
+
+            <div class="report-summary">
+                <div class="summary-card">
+                    <h3>Overview</h3>
+                    <div class="summary-stats">
+                        <div class="summary-item">
+                            <span class="summary-label">Total Objectives:</span>
+                            <span class="summary-value">{{.TotalObjectives}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Completed Tasks:</span>
+                            <span class="summary-value">{{.CompletedTasks}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Pending Tasks:</span>
+                            <span class="summary-value">{{.PendingTasks}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Average Performance:</span>
+                            <span class="summary-value performance-highlight">{{printf "%.1f" .AveragePerformance}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>Objectives Performance</h3>
+                {{if .Objectives}}
+                <div class="objectives-report">
+                    {{range .Objectives}}
+                    <div class="objective-report-card">
+                        <div class="objective-report-header">
+                            <h4>{{.Objective.Title}}</h4>
+                            <div class="performance-badge-large">
+                                <span class="performance-value">{{printf "%.1f" .Objective.Performance}}%</span>
+                            </div>
+                        </div>
+                        <p class="report-description">{{.Objective.Description}}</p>
+                        <div class="report-dates">
+                            <span>{{.Objective.StartDate.Format "Jan 02, 2006"}} - {{.Objective.EndDate.Format "Jan 02, 2006"}}</span>
+                        </div>
+
+                        {{if .ExpectedOutcomes}}
+                        <div class="outcomes-report">
+                            <h5>Expected Outcomes & Activities</h5>
+                            {{range .ExpectedOutcomes}}
+                            <div class="outcome-report">
+                                <strong>{{.ExpectedOutcome.Title}}</strong>
+                                {{if .Activities}}
+                                <div class="activities-summary">
+                                    <table class="report-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Activity</th>
+                                                <th>Category</th>
+                                                <th>Progress</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {{range .Activities}}
+                                            <tr>
+                                                <td>{{.Title}}</td>
+                                                <td><span class="category-badge category-{{.Category}}">{{.Category}}</span></td>
+                                                <td>
+                                                    <div class="mini-progress-bar">
+                                                        <div class="mini-progress-fill" style="width: {{.ProgressPercentage}}%"></div>
+                                                        <span>{{printf "%.0f" .ProgressPercentage}}%</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {{end}}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </div>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <p class="empty-message">No objectives to report on yet.</p>
+                {{end}}
+            </div>
+
+            <div class="report-section">
+                <h3>Tasks Summary</h3>
+                {{if .Tasks}}
+                <div class="tasks-report">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Tasks}}
+                            <tr>
+                                <td>{{.Title}}</td>
+                                <td><span class="priority-badge priority-{{.Priority}}">{{.Priority}}</span></td>
+                                <td><span class="status-badge status-{{.Status}}">{{.Status}}</span></td>
+                                <td>{{.DueDate.Format "Jan 02, 2006"}}</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <p class="empty-message">No tasks to report on yet.</p>
+                {{end}}
+            </div>
+
+            <div class="report-actions">
+                <button onclick="window.print()" class="btn btn-primary">🖨️ Print Report</button>
+                <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks - Staff Performance System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Staff Performance System</h1>
+            </div>
+            <div class="nav-user">
+                <span>Welcome, {{.User.FullName}}</span>
+                <a href="/dashboard" class="btn-link">Dashboard</a>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="main-menu">
+            <div class="menu-item">
+                <a href="/dashboard">
+                    <div class="menu-icon">🏠</div>
+                    <h3>Home</h3>
+                </a>
+            </div>
+            <div class="menu-item active">
+                <a href="/tasks">
+                    <div class="menu-icon">✓</div>
+                    <h3>Tasks</h3>
+                    <p>Manage your tasks</p>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/objectives">
+                    <div class="menu-icon">🎯</div>
+                    <h3>Objectives</h3>
+                    <p>Track performance goals</p>
+                </a>
+            </div>
+            <div class="menu-item">
+                <a href="/reports">
+                    <div class="menu-icon">📊</div>
+                    <h3>Reports</h3>
+                    <p>View analytics</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-header">
+                <h2>My Tasks</h2>
+                <a href="/tasks/new" class="btn btn-primary">+ New Task</a>
+            </div>
+
+            {{if .Tasks}}
+            <div class="task-filters">
+                <button class="filter-btn active" onclick="filterTasks('all')">All Tasks</button>
+                <button class="filter-btn" onclick="filterTasks('Pending')">Pending</button>
+                <button class="filter-btn" onclick="filterTasks('In Progress')">In Progress</button>
+                <button class="filter-btn" onclick="filterTasks('Completed')">Completed</button>
+                <button class="filter-btn" onclick="filterTasks('On Hold')">On Hold</button>
+            </div>
+
+            <div class="tasks-container">
+                {{range .Tasks}}
+                <div class="task-card" data-status="{{.Status}}">
+                    <div class="task-header">
+                        <div class="task-title-section">
+                            <h3>{{.Title}}</h3>
+                            <div class="task-badges">
+                                <span class="priority-badge priority-{{.Priority}}">{{.Priority}}</span>
+                                <span class="status-badge status-{{.Status}}">{{.Status}}</span>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <a href="/tasks/edit?id={{.ID}}" class="btn btn-secondary btn-sm">Edit</a>
+                            <a href="/tasks/delete?id={{.ID}}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this task?')">Delete</a>
+                        </div>
+                    </div>
+                    
+                    {{if .Description}}
+                    <p class="task-description">{{.Description}}</p>
+                    {{end}}
+                    
+                    <div class="task-meta">
+                        <div class="task-meta-item">
+                            <strong>Due Date:</strong> {{.DueDate.Format "Jan 02, 2006"}}
+                        </div>
+                        <div class="task-meta-item">
+                            <strong>Created:</strong> {{.CreatedAt.Format "Jan 02, 2006"}}
+                        </div>
+                        {{if .CompletedAt}}
+                        <div class="task-meta-item">
+                            <strong>Completed:</strong> {{.CompletedAt.Format "Jan 02, 2006"}}
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <div class="empty-state">
+                <h3>No Tasks Yet</h3>
+                <p>Create your first task to get started.</p>
+                <a href="/tasks/new" class="btn btn-primary">Create Your First Task</a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <script>
+        function filterTasks(status) {
+            const tasks = document.querySelectorAll('.task-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            tasks.forEach(task => {
+                if (status === 'all' || task.dataset.status === status) {
+                    task.style.display = 'block';
+                } else {
+                    task.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
