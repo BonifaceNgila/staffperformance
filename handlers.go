@@ -65,16 +65,27 @@ func newObjectiveHandler(w http.ResponseWriter, r *http.Request) {
 		description := r.FormValue("description")
 		startDate := r.FormValue("start_date")
 		endDate := r.FormValue("end_date")
+		visibility := ObjectiveVisibility(r.FormValue("visibility"))
+		status := ObjectiveStatus(r.FormValue("status"))
+		category := ObjectiveCategory(r.FormValue("category"))
+		categoryOther := r.FormValue("category_other")
+		weightStr := r.FormValue("weight")
 
 		start, _ := time.Parse("2006-01-02", startDate)
 		end, _ := time.Parse("2006-01-02", endDate)
+		weight, _ := strconv.ParseFloat(weightStr, 64)
 
 		obj := &Objective{
-			UserID:      user.ID,
-			Title:       title,
-			Description: description,
-			StartDate:   start,
-			EndDate:     end,
+			UserID:        user.ID,
+			Title:         title,
+			Description:   description,
+			StartDate:     start,
+			EndDate:       end,
+			Visibility:    visibility,
+			Status:        status,
+			Category:      category,
+			CategoryOther: categoryOther,
+			Weight:        weight,
 		}
 
 		err = CreateObjective(obj)
@@ -131,9 +142,15 @@ func editObjectiveHandler(w http.ResponseWriter, r *http.Request) {
 		obj.Description = r.FormValue("description")
 		startDate := r.FormValue("start_date")
 		endDate := r.FormValue("end_date")
+		obj.Visibility = ObjectiveVisibility(r.FormValue("visibility"))
+		obj.Status = ObjectiveStatus(r.FormValue("status"))
+		obj.Category = ObjectiveCategory(r.FormValue("category"))
+		obj.CategoryOther = r.FormValue("category_other")
+		weightStr := r.FormValue("weight")
 
 		obj.StartDate, _ = time.Parse("2006-01-02", startDate)
 		obj.EndDate, _ = time.Parse("2006-01-02", endDate)
+		obj.Weight, _ = strconv.ParseFloat(weightStr, 64)
 
 		err = UpdateObjective(obj)
 		if err != nil {

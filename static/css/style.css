@@ -1272,3 +1272,122 @@ body:has(.container) {
     outline: none;
     border-color: #667eea;
 }
+/* Objective Status Badges */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-badge.status-On.Track {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.status-Not.Started {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.status-badge.status-Pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.status-Complete {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-badge.status-Need.Help {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge-Public {
+    background-color: #e7f3ff;
+    color: #004085;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.badge-Private {
+    background-color: #f8f9fa;
+    color: #495057;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.badge-activity {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.badge-task {
+    background-color: #fff3e0;
+    color: #e65100;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.priority-badge {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.priority-badge.priority-Low {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.priority-badge.priority-Medium {
+    background-color: #fff9c4;
+    color: #f57f17;
+}
+
+.priority-badge.priority-High {
+    background-color: #ffe0b2;
+    color: #e65100;
+}
+
+.priority-badge.priority-Urgent {
+    background-color: #ffcdd2;
+    color: #c62828;
+}
+
+.status-completed {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.objective-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.objective-meta p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #495057;
+}
+

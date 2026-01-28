@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -42,6 +43,15 @@ func InitDB() error {
 
 func createTables() error {
 	schema := `
+	CREATE TABLE IF NOT EXISTS departments (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT UNIQUE NOT NULL,
+		head_id INTEGER,
+		description TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (head_id) REFERENCES users(id) ON DELETE SET NULL
+	);
+
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		username TEXT UNIQUE NOT NULL,
@@ -50,10 +60,35 @@ func createTables() error {
 		email TEXT,
 		role TEXT NOT NULL DEFAULT 'Staff',
 		supervisor_id INTEGER,
+		department_id INTEGER,
 		department TEXT,
 		position TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE SET NULL
+		FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE SET NULL,
+		FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS projects (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		description TEXT,
+		start_date DATETIME,
+		end_date DATETIME,
+		status TEXT NOT NULL DEFAULT 'Active',
+		manager_id INTEGER,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (manager_id) REFERENCES users(id) ON DELETE SET NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS project_assignments (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		project_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		role TEXT,
+		assigned_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+		UNIQUE(project_id, user_id)
 	);
 
 	CREATE TABLE IF NOT EXISTS objectives (
@@ -63,6 +98,11 @@ func createTables() error {
 		description TEXT,
 		start_date DATETIME,
 		end_date DATETIME,
+		visibility TEXT NOT NULL DEFAULT 'Public',
+		status TEXT NOT NULL DEFAULT 'Not Started',
+		category TEXT NOT NULL DEFAULT 'Other',
+		category_other TEXT,
+		weight REAL DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 	);
@@ -122,15 +162,15 @@ func createDefaultUser() error {
 
 // runMigrations handles database schema migrations
 func runMigrations() error {
-	// Migration: Add expected_outcome_id and completion_percentage to tasks table if they don't exist
 	var columnExists int
+
+	// Migration: Add expected_outcome_id and completion_percentage to tasks table if they don't exist
 	err := db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('tasks') WHERE name='expected_outcome_id'`).Scan(&columnExists)
 	if err != nil {
 		return err
 	}
 
 	if columnExists == 0 {
-		// Add expected_outcome_id column
 		_, err = db.Exec(`ALTER TABLE tasks ADD COLUMN expected_outcome_id INTEGER REFERENCES expected_outcomes(id) ON DELETE CASCADE`)
 		if err != nil {
 			return err
@@ -145,12 +185,50 @@ func runMigrations() error {
 	}
 
 	if columnExists == 0 {
-		// Add completion_percentage column
 		_, err = db.Exec(`ALTER TABLE tasks ADD COLUMN completion_percentage REAL DEFAULT 0`)
 		if err != nil {
 			return err
 		}
 		log.Println("Migration: Added completion_percentage column to tasks table")
+	}
+
+	// Migration: Add new columns to objectives table
+	objectiveCols := map[string]string{
+		"visibility":     "TEXT NOT NULL DEFAULT 'Public'",
+		"status":         "TEXT NOT NULL DEFAULT 'Not Started'",
+		"category":       "TEXT NOT NULL DEFAULT 'Other'",
+		"category_other": "TEXT",
+		"weight":         "REAL DEFAULT 0",
+	}
+
+	for colName, colDef := range objectiveCols {
+		err = db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('objectives') WHERE name=?`, colName).Scan(&columnExists)
+		if err != nil {
+			return err
+		}
+		if columnExists == 0 {
+			_, err = db.Exec(fmt.Sprintf(`ALTER TABLE objectives ADD COLUMN %s %s`, colName, colDef))
+			if err != nil {
+				log.Printf("Warning: Could not add column %s to objectives: %v", colName, err)
+			} else {
+				log.Printf("Migration: Added %s column to objectives table", colName)
+			}
+		}
+	}
+
+	// Migration: Add department_id to users table
+	err = db.QueryRow(`SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='department_id'`).Scan(&columnExists)
+	if err != nil {
+		return err
+	}
+
+	if columnExists == 0 {
+		_, err = db.Exec(`ALTER TABLE users ADD COLUMN department_id INTEGER REFERENCES departments(id) ON DELETE SET NULL`)
+		if err != nil {
+			log.Printf("Warning: Could not add department_id to users: %v", err)
+		} else {
+			log.Println("Migration: Added department_id column to users table")
+		}
 	}
 
 	return nil
@@ -160,14 +238,19 @@ func runMigrations() error {
 func GetUserByUsername(username string) (*User, error) {
 	user := &User{}
 	var supervisorID sql.NullInt64
-	query := `SELECT id, username, password, full_name, email, role, supervisor_id, department, position, created_at FROM users WHERE username = ?`
-	err := db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password, &user.FullName, &user.Email, &user.Role, &supervisorID, &user.Department, &user.Position, &user.CreatedAt)
+	var departmentID sql.NullInt64
+	query := `SELECT id, username, password, full_name, email, role, supervisor_id, department_id, department, position, created_at FROM users WHERE username = ?`
+	err := db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password, &user.FullName, &user.Email, &user.Role, &supervisorID, &departmentID, &user.Department, &user.Position, &user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
 	if supervisorID.Valid {
 		supervisorIDInt := int(supervisorID.Int64)
 		user.SupervisorID = &supervisorIDInt
+	}
+	if departmentID.Valid {
+		deptIDInt := int(departmentID.Int64)
+		user.DepartmentID = &deptIDInt
 	}
 	return user, nil
 }
@@ -175,14 +258,19 @@ func GetUserByUsername(username string) (*User, error) {
 func GetUserByID(id int) (*User, error) {
 	user := &User{}
 	var supervisorID sql.NullInt64
-	query := `SELECT id, username, password, full_name, email, role, supervisor_id, department, position, created_at FROM users WHERE id = ?`
-	err := db.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Password, &user.FullName, &user.Email, &user.Role, &supervisorID, &user.Department, &user.Position, &user.CreatedAt)
+	var departmentID sql.NullInt64
+	query := `SELECT id, username, password, full_name, email, role, supervisor_id, department_id, department, position, created_at FROM users WHERE id = ?`
+	err := db.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Password, &user.FullName, &user.Email, &user.Role, &supervisorID, &departmentID, &user.Department, &user.Position, &user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
 	if supervisorID.Valid {
 		supervisorIDInt := int(supervisorID.Int64)
 		user.SupervisorID = &supervisorIDInt
+	}
+	if departmentID.Valid {
+		deptIDInt := int(departmentID.Int64)
+		user.DepartmentID = &deptIDInt
 	}
 	return user, nil
 }
@@ -299,8 +387,8 @@ func GetStaffBySupervisor(supervisorID int) ([]User, error) {
 
 // Objective CRUD operations
 func CreateObjective(obj *Objective) error {
-	query := `INSERT INTO objectives (user_id, title, description, start_date, end_date) VALUES (?, ?, ?, ?, ?)`
-	result, err := db.Exec(query, obj.UserID, obj.Title, obj.Description, obj.StartDate, obj.EndDate)
+	query := `INSERT INTO objectives (user_id, title, description, start_date, end_date, visibility, status, category, category_other, weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	result, err := db.Exec(query, obj.UserID, obj.Title, obj.Description, obj.StartDate, obj.EndDate, obj.Visibility, obj.Status, obj.Category, obj.CategoryOther, obj.Weight)
 	if err != nil {
 		return err
 	}
@@ -313,7 +401,7 @@ func CreateObjective(obj *Objective) error {
 }
 
 func GetObjectivesByUserID(userID int) ([]Objective, error) {
-	query := `SELECT id, user_id, title, description, start_date, end_date, created_at FROM objectives WHERE user_id = ? ORDER BY created_at DESC`
+	query := `SELECT id, user_id, title, description, start_date, end_date, visibility, status, category, category_other, weight, created_at FROM objectives WHERE user_id = ? ORDER BY created_at DESC`
 	rows, err := db.Query(query, userID)
 	if err != nil {
 		return nil, err
@@ -323,9 +411,13 @@ func GetObjectivesByUserID(userID int) ([]Objective, error) {
 	var objectives []Objective
 	for rows.Next() {
 		var obj Objective
-		err := rows.Scan(&obj.ID, &obj.UserID, &obj.Title, &obj.Description, &obj.StartDate, &obj.EndDate, &obj.CreatedAt)
+		var categoryOther sql.NullString
+		err := rows.Scan(&obj.ID, &obj.UserID, &obj.Title, &obj.Description, &obj.StartDate, &obj.EndDate, &obj.Visibility, &obj.Status, &obj.Category, &categoryOther, &obj.Weight, &obj.CreatedAt)
 		if err != nil {
 			return nil, err
+		}
+		if categoryOther.Valid {
+			obj.CategoryOther = categoryOther.String
 		}
 		// Calculate performance
 		obj.Performance = CalculateObjectivePerformance(obj.ID)
@@ -336,18 +428,22 @@ func GetObjectivesByUserID(userID int) ([]Objective, error) {
 
 func GetObjectiveByID(id int) (*Objective, error) {
 	obj := &Objective{}
-	query := `SELECT id, user_id, title, description, start_date, end_date, created_at FROM objectives WHERE id = ?`
-	err := db.QueryRow(query, id).Scan(&obj.ID, &obj.UserID, &obj.Title, &obj.Description, &obj.StartDate, &obj.EndDate, &obj.CreatedAt)
+	var categoryOther sql.NullString
+	query := `SELECT id, user_id, title, description, start_date, end_date, visibility, status, category, category_other, weight, created_at FROM objectives WHERE id = ?`
+	err := db.QueryRow(query, id).Scan(&obj.ID, &obj.UserID, &obj.Title, &obj.Description, &obj.StartDate, &obj.EndDate, &obj.Visibility, &obj.Status, &obj.Category, &categoryOther, &obj.Weight, &obj.CreatedAt)
 	if err != nil {
 		return nil, err
+	}
+	if categoryOther.Valid {
+		obj.CategoryOther = categoryOther.String
 	}
 	obj.Performance = CalculateObjectivePerformance(obj.ID)
 	return obj, nil
 }
 
 func UpdateObjective(obj *Objective) error {
-	query := `UPDATE objectives SET title = ?, description = ?, start_date = ?, end_date = ? WHERE id = ?`
-	_, err := db.Exec(query, obj.Title, obj.Description, obj.StartDate, obj.EndDate, obj.ID)
+	query := `UPDATE objectives SET title = ?, description = ?, start_date = ?, end_date = ?, visibility = ?, status = ?, category = ?, category_other = ?, weight = ? WHERE id = ?`
+	_, err := db.Exec(query, obj.Title, obj.Description, obj.StartDate, obj.EndDate, obj.Visibility, obj.Status, obj.Category, obj.CategoryOther, obj.Weight, obj.ID)
 	return err
 }
 
@@ -966,3 +1062,197 @@ ExpectedOutcomes: outcomesWithActivities,
 
 return objectivesWithOutcomes, nil
 }
+
+// Department CRUD operations
+func CreateDepartment(dept *Department) error {
+query := `INSERT INTO departments (name, head_id, description) VALUES (?, ?, ?)`
+result, err := db.Exec(query, dept.Name, dept.HeadID, dept.Description)
+if err != nil {
+return err
+}
+id, err := result.LastInsertId()
+if err != nil {
+return err
+}
+dept.ID = int(id)
+return nil
+}
+
+func GetDepartmentByID(id int) (*Department, error) {
+dept := &Department{}
+var headID sql.NullInt64
+query := `SELECT id, name, head_id, description, created_at FROM departments WHERE id = ?`
+err := db.QueryRow(query, id).Scan(&dept.ID, &dept.Name, &headID, &dept.Description, &dept.CreatedAt)
+if err != nil {
+return nil, err
+}
+if headID.Valid {
+hid := int(headID.Int64)
+dept.HeadID = &hid
+}
+return dept, nil
+}
+
+func GetAllDepartments() ([]Department, error) {
+query := `SELECT id, name, head_id, description, created_at FROM departments ORDER BY name`
+rows, err := db.Query(query)
+if err != nil {
+return nil, err
+}
+defer rows.Close()
+
+var departments []Department
+for rows.Next() {
+var dept Department
+var headID sql.NullInt64
+err := rows.Scan(&dept.ID, &dept.Name, &headID, &dept.Description, &dept.CreatedAt)
+if err != nil {
+return nil, err
+}
+if headID.Valid {
+hid := int(headID.Int64)
+dept.HeadID = &hid
+}
+departments = append(departments, dept)
+}
+return departments, nil
+}
+
+func UpdateDepartment(dept *Department) error {
+query := `UPDATE departments SET name = ?, head_id = ?, description = ? WHERE id = ?`
+_, err := db.Exec(query, dept.Name, dept.HeadID, dept.Description, dept.ID)
+return err
+}
+
+func DeleteDepartment(id int) error {
+query := `DELETE FROM departments WHERE id = ?`
+_, err := db.Exec(query, id)
+return err
+}
+
+// Project CRUD operations
+func CreateProject(proj *Project) error {
+query := `INSERT INTO projects (name, description, start_date, end_date, status, manager_id) VALUES (?, ?, ?, ?, ?, ?)`
+result, err := db.Exec(query, proj.Name, proj.Description, proj.StartDate, proj.EndDate, proj.Status, proj.ManagerID)
+if err != nil {
+return err
+}
+id, err := result.LastInsertId()
+if err != nil {
+return err
+}
+proj.ID = int(id)
+return nil
+}
+
+func GetProjectByID(id int) (*Project, error) {
+proj := &Project{}
+var managerID sql.NullInt64
+query := `SELECT id, name, description, start_date, end_date, status, manager_id, created_at FROM projects WHERE id = ?`
+err := db.QueryRow(query, id).Scan(&proj.ID, &proj.Name, &proj.Description, &proj.StartDate, &proj.EndDate, &proj.Status, &managerID, &proj.CreatedAt)
+if err != nil {
+return nil, err
+}
+if managerID.Valid {
+mid := int(managerID.Int64)
+proj.ManagerID = &mid
+}
+return proj, nil
+}
+
+func GetAllProjects() ([]Project, error) {
+query := `SELECT id, name, description, start_date, end_date, status, manager_id, created_at FROM projects ORDER BY name`
+rows, err := db.Query(query)
+if err != nil {
+return nil, err
+}
+defer rows.Close()
+
+var projects []Project
+for rows.Next() {
+var proj Project
+var managerID sql.NullInt64
+err := rows.Scan(&proj.ID, &proj.Name, &proj.Description, &proj.StartDate, &proj.EndDate, &proj.Status, &managerID, &proj.CreatedAt)
+if err != nil {
+return nil, err
+}
+if managerID.Valid {
+mid := int(managerID.Int64)
+proj.ManagerID = &mid
+}
+projects = append(projects, proj)
+}
+return projects, nil
+}
+
+func UpdateProject(proj *Project) error {
+query := `UPDATE projects SET name = ?, description = ?, start_date = ?, end_date = ?, status = ?, manager_id = ? WHERE id = ?`
+_, err := db.Exec(query, proj.Name, proj.Description, proj.StartDate, proj.EndDate, proj.Status, proj.ManagerID, proj.ID)
+return err
+}
+
+func DeleteProject(id int) error {
+query := `DELETE FROM projects WHERE id = ?`
+_, err := db.Exec(query, id)
+return err
+}
+
+// ProjectAssignment CRUD operations
+func AssignUserToProject(projectID, userID int, role string) error {
+query := `INSERT INTO project_assignments (project_id, user_id, role) VALUES (?, ?, ?)`
+_, err := db.Exec(query, projectID, userID, role)
+return err
+}
+
+func GetProjectAssignments(projectID int) ([]ProjectAssignment, error) {
+query := `SELECT pa.id, pa.project_id, pa.user_id, pa.role, pa.assigned_date, u.full_name 
+FROM project_assignments pa
+INNER JOIN users u ON pa.user_id = u.id
+WHERE pa.project_id = ?`
+rows, err := db.Query(query, projectID)
+if err != nil {
+return nil, err
+}
+defer rows.Close()
+
+var assignments []ProjectAssignment
+for rows.Next() {
+var pa ProjectAssignment
+err := rows.Scan(&pa.ID, &pa.ProjectID, &pa.UserID, &pa.Role, &pa.AssignedDate, &pa.UserName)
+if err != nil {
+return nil, err
+}
+assignments = append(assignments, pa)
+}
+return assignments, nil
+}
+
+func GetUserProjects(userID int) ([]ProjectAssignment, error) {
+query := `SELECT pa.id, pa.project_id, pa.user_id, pa.role, pa.assigned_date, p.name 
+FROM project_assignments pa
+INNER JOIN projects p ON pa.project_id = p.id
+WHERE pa.user_id = ?`
+rows, err := db.Query(query, userID)
+if err != nil {
+return nil, err
+}
+defer rows.Close()
+
+var assignments []ProjectAssignment
+for rows.Next() {
+var pa ProjectAssignment
+err := rows.Scan(&pa.ID, &pa.ProjectID, &pa.UserID, &pa.Role, &pa.AssignedDate, &pa.ProjectName)
+if err != nil {
+return nil, err
+}
+assignments = append(assignments, pa)
+}
+return assignments, nil
+}
+
+func RemoveUserFromProject(projectID, userID int) error {
+query := `DELETE FROM project_assignments WHERE project_id = ? AND user_id = ?`
+_, err := db.Exec(query, projectID, userID)
+return err
+}
+

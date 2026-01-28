@@ -11,6 +11,35 @@ const (
 	RoleStaff      UserRole = "Staff"
 )
 
+// ObjectiveVisibility represents whether an objective is public or private
+type ObjectiveVisibility string
+
+const (
+	VisibilityPublic  ObjectiveVisibility = "Public"
+	VisibilityPrivate ObjectiveVisibility = "Private"
+)
+
+// ObjectiveStatus represents the status of an objective
+type ObjectiveStatus string
+
+const (
+	StatusOnTrack    ObjectiveStatus = "On Track"
+	StatusNotStarted ObjectiveStatus = "Not Started"
+	StatusPending    ObjectiveStatus = "Pending"
+	StatusComplete   ObjectiveStatus = "Complete"
+	StatusNeedHelp   ObjectiveStatus = "Need Help"
+)
+
+// ObjectiveCategory represents the category of an objective
+type ObjectiveCategory string
+
+const (
+	CategoryFinancial             ObjectiveCategory = "Financial"
+	CategoryContinuousImprovement ObjectiveCategory = "Continuous Improvement"
+	CategoryPeople                ObjectiveCategory = "People"
+	CategoryOther                 ObjectiveCategory = "Other"
+)
+
 // User represents a staff member
 type User struct {
 	ID                 int
@@ -20,11 +49,47 @@ type User struct {
 	Email              string
 	Role               UserRole
 	SupervisorID       *int
-	Department         string
+	DepartmentID       *int
+	Department         string // Deprecated: kept for backward compatibility
 	Position           string
 	CreatedAt          time.Time
 	SupervisorName     string  // For display purposes
+	DepartmentName     string  // For display purposes
 	OverallPerformance float64 // For supervisor dashboard
+}
+
+// Department represents an organizational department
+type Department struct {
+	ID          int
+	Name        string
+	HeadID      *int
+	Description string
+	CreatedAt   time.Time
+	HeadName    string // For display purposes
+}
+
+// Project represents a project that employees can be assigned to
+type Project struct {
+	ID          int
+	Name        string
+	Description string
+	StartDate   time.Time
+	EndDate     time.Time
+	Status      string
+	ManagerID   *int
+	CreatedAt   time.Time
+	ManagerName string // For display purposes
+}
+
+// ProjectAssignment represents the assignment of an employee to a project
+type ProjectAssignment struct {
+	ID           int
+	ProjectID    int
+	UserID       int
+	Role         string
+	AssignedDate time.Time
+	ProjectName  string // For display purposes
+	UserName     string // For display purposes
 }
 
 // Objective represents a performance objective
@@ -37,6 +102,13 @@ type Objective struct {
 	EndDate     time.Time
 	CreatedAt   time.Time
 	Performance float64 // Calculated mean percentage
+	// New fields
+	Visibility    ObjectiveVisibility
+	Status        ObjectiveStatus
+	Category      ObjectiveCategory
+	CategoryOther string  // For "Other" category specification
+	Weight        float64 // Percentage weight (0-100)
+	OwnerName     string  // For display purposes
 }
 
 // ExpectedOutcome represents an expected outcome for an objective

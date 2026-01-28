@@ -60,11 +60,25 @@
                 <div class="objective-card">
                     <div class="objective-header">
                         <div>
-                            <h3>{{.Objective.Title}}</h3>
+                            <h3>
+                                {{.Objective.Title}}
+                                <span class="badge badge-{{.Objective.Visibility}}" style="font-size: 0.7em; margin-left: 10px;">{{.Objective.Visibility}}</span>
+                            </h3>
                             <p class="objective-description">{{.Objective.Description}}</p>
-                            <p class="objective-dates">
-                                <strong>Period:</strong> {{.Objective.StartDate.Format "Jan 02, 2006"}} - {{.Objective.EndDate.Format "Jan 02, 2006"}}
-                            </p>
+                            <div class="objective-meta">
+                                <p class="objective-dates">
+                                    <strong>Period:</strong> {{.Objective.StartDate.Format "Jan 02, 2006"}} - {{.Objective.EndDate.Format "Jan 02, 2006"}}
+                                </p>
+                                <p>
+                                    <strong>Status:</strong> <span class="status-badge status-{{.Objective.Status}}">{{.Objective.Status}}</span>
+                                </p>
+                                <p>
+                                    <strong>Category:</strong> {{.Objective.Category}}{{if eq .Objective.Category "Other"}} ({{.Objective.CategoryOther}}){{end}}
+                                </p>
+                                <p>
+                                    <strong>Weight:</strong> {{printf "%.1f" .Objective.Weight}}%
+                                </p>
+                            </div>
                         </div>
                         <div class="objective-actions">
                             <div class="performance-badge">
