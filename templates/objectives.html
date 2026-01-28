@@ -98,25 +98,30 @@
 
                                 <div class="activities-section">
                                     <div class="section-header">
-                                        <h6>Activities/Tasks</h6>
-                                        <a href="/activities/new?outcome_id={{.ExpectedOutcome.ID}}" class="btn btn-link">+ Add Activity</a>
+                                        <h6>Activities & Tasks</h6>
+                                        <div>
+                                            <a href="/activities/new?outcome_id={{.ExpectedOutcome.ID}}" class="btn btn-link">+ Activity</a>
+                                            <a href="/tasks/new" class="btn btn-link">+ Task</a>
+                                        </div>
                                     </div>
 
-                                    {{if .Activities}}
+                                    {{if or .Activities .Tasks}}
                                     <div class="activities-table">
                                         <table>
                                             <thead>
                                                 <tr>
+                                                    <th>Type</th>
                                                     <th>Title</th>
-                                                    <th>Category</th>
-                                                    <th>Progress</th>
-                                                    <th>Implementation Level</th>
+                                                    <th>Category/Priority</th>
+                                                    <th>Progress/Status</th>
+                                                    <th>Details</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {{range .Activities}}
                                                 <tr>
+                                                    <td><span class="badge badge-activity">Activity</span></td>
                                                     <td>
                                                         <strong>{{.Title}}</strong>
                                                         {{if .Description}}<br><small>{{.Description}}</small>{{end}}
@@ -135,11 +140,36 @@
                                                     </td>
                                                 </tr>
                                                 {{end}}
+                                                {{range .Tasks}}
+                                                <tr>
+                                                    <td><span class="badge badge-task">Task</span></td>
+                                                    <td>
+                                                        <strong>{{.Title}}</strong>
+                                                        {{if .Description}}<br><small>{{.Description}}</small>{{end}}
+                                                    </td>
+                                                    <td><span class="priority-badge priority-{{.Priority}}">{{.Priority}}</span></td>
+                                                    <td>
+                                                        {{if eq .Status "Completed"}}
+                                                            <span class="status-badge status-completed">✓ Completed</span>
+                                                        {{else}}
+                                                            <div class="progress-bar">
+                                                                <div class="progress-fill" style="width: {{.CompletionPercentage}}%"></div>
+                                                                <span class="progress-text">{{printf "%.0f" .CompletionPercentage}}%</span>
+                                                            </div>
+                                                        {{end}}
+                                                    </td>
+                                                    <td><small>Due: {{.DueDate.Format "Jan 02, 2006"}}</small></td>
+                                                    <td>
+                                                        <a href="/tasks/edit?id={{.ID}}" class="btn btn-link">Edit</a>
+                                                        <a href="/tasks/delete?id={{.ID}}" class="btn btn-link" onclick="return confirm('Delete this task?')">Delete</a>
+                                                    </td>
+                                                </tr>
+                                                {{end}}
                                             </tbody>
                                         </table>
                                     </div>
                                     {{else}}
-                                    <p class="empty-message">No activities yet. Add your first activity to track progress.</p>
+                                    <p class="empty-message">No activities or tasks yet. Add your first activity or task to track progress.</p>
                                     {{end}}
                                 </div>
                             </div>

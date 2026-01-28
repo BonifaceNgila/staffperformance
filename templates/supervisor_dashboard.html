@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Dashboard - Performance Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Supervisor Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{.Username}} ({{.Role}})</span>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="/dashboard">Dashboard</a> &gt; <span>Supervisor Dashboard</span>
+        </nav>
+
+        <div class="actions">
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <div class="card">
+            <h2>{{if eq .Role "Admin"}}All Staff Members{{else}}My Team{{end}}</h2>
+            
+            {{if .Staff}}
+            <table class="staff-table">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Overall Performance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Staff}}
+                    <tr>
+                        <td><strong>{{.Username}}</strong></td>
+                        <td>{{.Department}}</td>
+                        <td>{{.Position}}</td>
+                        <td>
+                            <div class="performance-indicator">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{.OverallPerformance}}%"></div>
+                                </div>
+                                <span>{{printf "%.1f" .OverallPerformance}}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="/supervisor/staff?id={{.ID}}" class="btn btn-small btn-primary">View Report</a>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{else}}
+            <p class="no-data">No staff members found.</p>
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>

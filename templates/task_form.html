@@ -24,6 +24,26 @@
 
             <form method="POST" class="data-form">
                 <div class="form-group">
+                    <label for="objective_id">Link to Objective & Expected Outcome</label>
+                    <select id="expected_outcome_id" name="expected_outcome_id">
+                        <option value="">-- Optional: Select an Expected Outcome --</option>
+                        {{range .Objectives}}
+                            <optgroup label="{{.Objective.Title}}">
+                                {{range .ExpectedOutcomes}}
+                                <option value="{{.ExpectedOutcome.ID}}" 
+                                    {{if $.Task}}{{if $.Task.ExpectedOutcomeID}}{{if eq $.Task.ExpectedOutcomeID .ExpectedOutcome.ID}}selected{{end}}{{end}}{{end}}>
+                                    {{.ExpectedOutcome.Title}}
+                                </option>
+                                {{end}}
+                            </optgroup>
+                        {{end}}
+                    </select>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Linking a task to an expected outcome helps track objective performance
+                    </small>
+                </div>
+
+                <div class="form-group">
                     <label for="title">Task Title *</label>
                     <input 
                         type="text" 
@@ -68,15 +88,34 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="due_date">Due Date *</label>
-                    <input 
-                        type="date" 
-                        id="due_date" 
-                        name="due_date" 
-                        value="{{if .Task}}{{.Task.DueDate.Format "2006-01-02"}}{{end}}"
-                        required
-                    >
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="due_date">Due Date *</label>
+                        <input 
+                            type="date" 
+                            id="due_date" 
+                            name="due_date" 
+                            value="{{if .Task}}{{.Task.DueDate.Format "2006-01-02"}}{{end}}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="completion_percentage">Completion % (0-100)</label>
+                        <input 
+                            type="number" 
+                            id="completion_percentage" 
+                            name="completion_percentage" 
+                            min="0" 
+                            max="100" 
+                            step="1"
+                            value="{{if .Task}}{{.Task.CompletionPercentage}}{{else}}0{{end}}"
+                            placeholder="0"
+                        >
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            For tasks in progress - helps calculate objective performance
+                        </small>
+                    </div>
                 </div>
 
                 <div class="form-actions">

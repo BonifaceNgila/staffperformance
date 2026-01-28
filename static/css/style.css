@@ -1059,3 +1059,216 @@ body:has(.container) {
         grid-template-columns: 1fr;
     }
 }
+/* Staff Management Styles */
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.staff-table thead {
+    background: #f8f9fa;
+}
+
+.staff-table th,
+.staff-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.staff-table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.staff-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.badge-Admin {
+    background: #dc3545;
+    color: white;
+}
+
+.badge-Supervisor {
+    background: #ffc107;
+    color: #333;
+}
+
+.badge-Staff {
+    background: #28a745;
+    color: white;
+}
+
+/* Staff Info Card */
+.staff-info-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Performance Indicator */
+.performance-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.performance-indicator .progress-bar {
+    flex: 1;
+    min-width: 100px;
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.comment {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #667eea;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.comment-date {
+    margin-left: auto;
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.comment p {
+    margin: 10px 0;
+    color: #495057;
+}
+
+/* Objective Actions */
+.objective-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Register Link on Login Page */
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.register-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* Login Card for Registration Page */
+.login-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+.login-card h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Activities Table in Staff Report */
+.activities-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.activities-table thead {
+    background: #f8f9fa;
+}
+
+.activities-table th,
+.activities-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.activities-table .progress-bar {
+    width: 100px;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* Task Type Badge */
+.task-type-badge {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.task-type-Personal {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.task-type-ServiceRequest {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.task-type-StaffAssignment {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.task-type-Response {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+/* Form Improvements */
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}

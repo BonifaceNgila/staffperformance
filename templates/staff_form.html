@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{if .IsEdit}}Edit{{else}}Add{{end}} Staff - Performance Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{if .IsEdit}}Edit{{else}}Add New{{end}} Staff</h1>
+            <div class="user-info">
+                <span>Welcome, {{.Username}}</span>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="/dashboard">Dashboard</a> &gt; 
+            <a href="/staff">Staff Management</a> &gt; 
+            <span>{{if .IsEdit}}Edit{{else}}Add{{end}} Staff</span>
+        </nav>
+
+        <div class="card">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Username*</label>
+                    <input type="text" id="username" name="username" value="{{if .Staff}}{{.Staff.Username}}{{end}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password{{if not .IsEdit}}*{{end}}</label>
+                    <input type="password" id="password" name="password" {{if not .IsEdit}}required{{end}}>
+                    {{if .IsEdit}}<small>Leave blank to keep current password</small>{{end}}
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Role*</label>
+                    <select id="role" name="role" required>
+                        <option value="Staff" {{if .Staff}}{{if eq .Staff.Role "Staff"}}selected{{end}}{{end}}>Staff</option>
+                        <option value="Supervisor" {{if .Staff}}{{if eq .Staff.Role "Supervisor"}}selected{{end}}{{end}}>Supervisor</option>
+                        <option value="Admin" {{if .Staff}}{{if eq .Staff.Role "Admin"}}selected{{end}}{{end}}>Admin</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <input type="text" id="department" name="department" value="{{if .Staff}}{{.Staff.Department}}{{end}}">
+                </div>
+
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input type="text" id="position" name="position" value="{{if .Staff}}{{.Staff.Position}}{{end}}">
+                </div>
+
+                <div class="form-group">
+                    <label for="supervisor_id">Supervisor</label>
+                    <select id="supervisor_id" name="supervisor_id">
+                        <option value="">None</option>
+                        {{range .Supervisors}}
+                        <option value="{{.ID}}" {{if $.Staff}}{{if $.Staff.SupervisorID}}{{if eq $.Staff.SupervisorID .ID}}selected{{end}}{{end}}{{end}}>{{.Username}} ({{.Role}})</option>
+                        {{end}}
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">{{if .IsEdit}}Update{{else}}Create{{end}} Staff</button>
+                    <a href="/staff" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Report - {{.Staff.Username}} - Performance Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Staff Performance Report</h1>
+            <div class="user-info">
+                <span>Welcome, {{.Username}}</span>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="/dashboard">Dashboard</a> &gt; 
+            <a href="/supervisor/dashboard">Supervisor Dashboard</a> &gt; 
+            <span>{{.Staff.Username}}</span>
+        </nav>
+
+        <div class="staff-info-card">
+            <h2>{{.Staff.Username}}</h2>
+            <div class="info-grid">
+                <div><strong>Department:</strong> {{.Staff.Department}}</div>
+                <div><strong>Position:</strong> {{.Staff.Position}}</div>
+                <div><strong>Role:</strong> {{.Staff.Role}}</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/supervisor/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <h2>Objectives</h2>
+        {{if .Objectives}}
+        {{range .Objectives}}
+        <div class="objective-card">
+            <div class="objective-header">
+                <h3>{{.Objective.Title}}</h3>
+                <span class="performance-badge">{{printf "%.1f" .Objective.PerformancePercentage}}%</span>
+            </div>
+            <p>{{.Objective.Description}}</p>
+
+            {{if .Outcomes}}
+            <h4>Expected Outcomes</h4>
+            {{range .Outcomes}}
+            <div class="outcome-section">
+                <h5>{{.Title}}</h5>
+                <p>{{.Description}}</p>
+            </div>
+            {{end}}
+            {{end}}
+
+            {{if .Activities}}
+            <h4>Activities</h4>
+            <table class="activities-table">
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Category</th>
+                        <th>Progress</th>
+                        <th>Implementation Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Activities}}
+                    <tr>
+                        <td>{{.Title}}</td>
+                        <td><span class="badge">{{.Category}}</span></td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{.ProgressPercentage}}%"></div>
+                            </div>
+                            <span>{{.ProgressPercentage}}%</span>
+                        </td>
+                        <td>{{.ImplementationLevel}}</td>
+                        <td>
+                            <a href="/comments/new?objective_id={{$.Objective.ID}}&activity_id={{.ID}}&staff_id={{$.Staff.ID}}" class="btn btn-small btn-primary">Add Comment</a>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{end}}
+
+            {{if .Comments}}
+            <div class="comments-section">
+                <h4>Comments</h4>
+                {{range .Comments}}
+                <div class="comment">
+                    <div class="comment-header">
+                        <strong>{{.Username}}</strong> <span class="badge badge-{{.UserRole}}">{{.UserRole}}</span>
+                        <span class="comment-date">{{.CreatedAt.Format "2006-01-02 15:04"}}</span>
+                    </div>
+                    <p>{{.CommentText}}</p>
+                    <a href="/comments/delete?id={{.ID}}&staff_id={{$.Staff.ID}}" class="btn btn-small btn-danger" onclick="return confirm('Delete this comment?')">Delete</a>
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+
+            <div class="objective-actions">
+                <a href="/comments/new?objective_id={{.Objective.ID}}&staff_id={{$.Staff.ID}}" class="btn btn-primary">Add Comment on Objective</a>
+            </div>
+        </div>
+        {{end}}
+        {{else}}
+        <div class="card">
+            <p class="no-data">No objectives found for this staff member.</p>
+        </div>
+        {{end}}
+
+        {{if .Tasks}}
+        <h2>Tasks</h2>
+        <div class="tasks-grid">
+            {{range .Tasks}}
+            <div class="task-card task-{{.Priority}}">
+                <div class="task-header">
+                    <h4>{{.Title}}</h4>
+                    <span class="badge badge-{{.Priority}}">{{.Priority}}</span>
+                </div>
+                <p>{{.Description}}</p>
+                <div class="task-meta">
+                    <span class="status-badge status-{{.Status}}">{{.Status}}</span>
+                    <span class="due-date">Due: {{.DueDate.Format "2006-01-02"}}</span>
+                </div>
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>

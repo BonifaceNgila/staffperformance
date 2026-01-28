@@ -46,6 +46,24 @@
                     <p>View analytics</p>
                 </a>
             </div>
+            {{if or (eq .User.Role "Supervisor") (eq .User.Role "Admin")}}
+            <div class="menu-item">
+                <a href="/supervisor/dashboard">
+                    <div class="menu-icon">👥</div>
+                    <h3>My Team</h3>
+                    <p>Supervise staff</p>
+                </a>
+            </div>
+            {{end}}
+            {{if eq .User.Role "Admin"}}
+            <div class="menu-item">
+                <a href="/staff">
+                    <div class="menu-icon">👤</div>
+                    <h3>Staff</h3>
+                    <p>Manage users</p>
+                </a>
+            </div>
+            {{end}}
         </div>
 
         <div class="dashboard-content">

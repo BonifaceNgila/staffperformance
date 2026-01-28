@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Comment - Performance Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Add Comment</h1>
+            <div class="user-info">
+                <span>Welcome, {{.Username}}</span>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+            </div>
+        </header>
+
+        <nav class="breadcrumb">
+            <a href="/dashboard">Dashboard</a> &gt; 
+            <a href="/supervisor/dashboard">Supervisor Dashboard</a> &gt; 
+            <a href="/supervisor/staff?id={{.StaffID}}">Staff Report</a> &gt;
+            <span>Add Comment</span>
+        </nav>
+
+        <div class="card">
+            <h2>Comment on: {{.Objective.Title}}</h2>
+            {{if .Activity}}
+            <p><strong>Activity:</strong> {{.Activity.Title}}</p>
+            {{end}}
+
+            <form method="POST">
+                <input type="hidden" name="objective_id" value="{{.Objective.ID}}">
+                {{if .Activity}}
+                <input type="hidden" name="activity_id" value="{{.Activity.ID}}">
+                {{end}}
+                <input type="hidden" name="staff_id" value="{{.StaffID}}">
+
+                <div class="form-group">
+                    <label for="comment_text">Comment*</label>
+                    <textarea id="comment_text" name="comment_text" rows="5" required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                    <a href="/supervisor/staff?id={{.StaffID}}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

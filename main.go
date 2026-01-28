@@ -27,6 +27,7 @@ func main() {
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/register", registrationHandler)
 
 	// Protected routes
 	http.HandleFunc("/dashboard", RequireAuth(dashboardHandler))
@@ -55,6 +56,20 @@ func main() {
 	http.HandleFunc("/activities/new", RequireAuth(newActivityHandler))
 	http.HandleFunc("/activities/edit", RequireAuth(editActivityHandler))
 	http.HandleFunc("/activities/delete", RequireAuth(deleteActivityHandler))
+
+	// Staff management routes (Admin only)
+	http.HandleFunc("/staff", RequireAuth(staffListHandler))
+	http.HandleFunc("/staff/new", RequireAuth(newStaffHandler))
+	http.HandleFunc("/staff/edit", RequireAuth(editStaffHandler))
+	http.HandleFunc("/staff/delete", RequireAuth(deleteStaffHandler))
+
+	// Supervisor routes
+	http.HandleFunc("/supervisor/dashboard", RequireAuth(supervisorDashboardHandler))
+	http.HandleFunc("/supervisor/staff", RequireAuth(viewStaffReportHandler))
+
+	// Comment routes
+	http.HandleFunc("/comments/new", RequireAuth(addCommentHandler))
+	http.HandleFunc("/comments/delete", RequireAuth(deleteCommentHandler))
 
 	log.Println("Server starting on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

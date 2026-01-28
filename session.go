@@ -46,6 +46,23 @@ func GetSession(r *http.Request) (*User, error) {
 	return GetUserByID(userID)
 }
 
+// GetSessionValues gets session values as a map
+func GetSessionValues(r *http.Request) (map[string]interface{}, error) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		return nil, err
+	}
+
+	values := make(map[string]interface{})
+	for key, value := range session.Values {
+		if keyStr, ok := key.(string); ok {
+			values[keyStr] = value
+		}
+	}
+
+	return values, nil
+}
+
 // ClearSession clears user session
 func ClearSession(w http.ResponseWriter, r *http.Request) error {
 	session, err := store.Get(r, "session")
